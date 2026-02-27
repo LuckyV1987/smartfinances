@@ -1,11 +1,7 @@
 package com.smartfinances.repository;
 
-import com.smartfinances.entity.Transaction;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-@Repository
-public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+// Placeholder - will be implemented when Transaction entity is ready
+public interface TransactionRepository {
 
 }
 

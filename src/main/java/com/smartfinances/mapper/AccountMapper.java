@@ -1,8 +1,6 @@
 package com.smartfinances.mapper;
 
-import org.springframework.stereotype.Component;
-
-@Component
+// Placeholder - will be implemented when Account feature is ready
 public class AccountMapper {
 
 }

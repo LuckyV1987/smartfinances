@@ -1,8 +1,6 @@
 package com.smartfinances.service;
 
-import org.springframework.stereotype.Service;
-
-@Service
+// Placeholder - will be implemented when Household entity is ready
 public class HouseholdService {
 
 }

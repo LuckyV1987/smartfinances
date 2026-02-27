@@ -1,53 +1,32 @@
 # SmartFinances — Data Model
+*Updated iteratively as features are built. Reflects current state only.*
+
+---
+
+## Current Version: V2
+
+---
 
 ## Entity Relationships
 
 ```
-Household
+User
   ├── id (PK)
-  ├── name
+  ├── email
+  ├── password
+  ├── first_name
+  ├── last_name
+  ├── phone_number
+  ├── date_of_birth
+  ├── deleted_at
   └── [audit fields]
        │
-       ├──< Member
-       │      ├── id (PK)
-       │      ├── household_id (FK)
-       │      ├── user_id (FK)
-       │      └── [audit fields]
-       │
-       ├──< Account
-       │      ├── id (PK)
-       │      ├── household_id (FK)
-       │      ├── name
-       │      ├── type
-       │      ├── balance
-       │      └── [audit fields]
-       │
-       ├──< BudgetCategory
-       │      ├── id (PK)
-       │      ├── household_id (FK)
-       │      ├── name
-       │      ├── allocated_amount
-       │      ├── deleted_at
-       │      └── [audit fields]
-       │
-       └──< Transaction
+       └──< RefreshToken
               ├── id (PK)
-              ├── household_id (FK)
-              ├── member_id (FK)
-              ├── account_id (FK)
-              ├── budget_category_id (FK)
-              ├── amount
-              ├── description
-              ├── date
-              ├── deleted_at
+              ├── user_id (FK)
+              ├── token
+              ├── expires_at
               └── [audit fields]
-                   │
-                   └──< TransactionItem
-                          ├── id (PK)
-                          ├── transaction_id (FK)
-                          ├── description
-                          ├── amount
-                          └── [audit fields]
 ```
 
 ---
@@ -56,14 +35,7 @@ Household
 
 | Relationship | Type | Foreign Key |
 |-------------|------|-------------|
-| Household → Member | One to Many | member.household_id |
-| Household → Account | One to Many | account.household_id |
-| Household → BudgetCategory | One to Many | budget_category.household_id |
-| Household → Transaction | One to Many | transaction.household_id |
-| Member → Transaction | One to Many | transaction.member_id |
-| Account → Transaction | One to Many | transaction.account_id |
-| BudgetCategory → Transaction | One to Many | transaction.budget_category_id |
-| Transaction → TransactionItem | One to Many | transaction_item.transaction_id |
+| User → RefreshToken | One to Many | refresh_token.user_id |
 
 ---
 
@@ -71,10 +43,7 @@ Household
 
 | Entity | Reason |
 |--------|--------|
-| Transaction | User correction, audit trail |
-| BudgetCategory | Historical analytics integrity |
-
-All other entities use hard delete.
+| User | Account deactivation without data loss |
 
 ---
 
@@ -93,5 +62,13 @@ All entities inherit the following from BaseEntity:
 ## Notes
 - All primary keys are BIGSERIAL (auto-incrementing Long)
 - All foreign keys have corresponding indexes
-- Data model is subject to change as features are added
 - See `docs/architecture/decisions/ADR.md` for decisions that shaped this model
+- See `docs/architecture/decisions/ADR-010-jwt-authentication.md` for auth decisions
+
+---
+
+## Changelog
+| Version | Change |
+|---------|--------|
+| V1 | Added users table |
+| V2 | Added refresh_tokens table |

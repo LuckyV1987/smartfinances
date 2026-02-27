@@ -1,8 +1,6 @@
 package com.smartfinances.service;
 
-import org.springframework.stereotype.Service;
-
-@Service
+// Placeholder - will be implemented when Member entity is ready
 public class MemberService {
 
 }
