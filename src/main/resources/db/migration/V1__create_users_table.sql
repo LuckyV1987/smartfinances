@@ -8,9 +8,7 @@ CREATE TABLE users (
     date_of_birth   DATE,
     deleted_at      TIMESTAMP NULL,
     created_at      TIMESTAMP NOT NULL,
-    updated_at      TIMESTAMP NOT NULL,
-    created_by      BIGINT NOT NULL,
-    updated_by      BIGINT NOT NULL
+    updated_at      TIMESTAMP NOT NULL
 );
 
 CREATE INDEX idx_users_email ON users(email);

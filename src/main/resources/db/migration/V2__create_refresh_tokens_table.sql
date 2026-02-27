@@ -4,9 +4,7 @@ CREATE TABLE refresh_tokens (
     token       VARCHAR(512) NOT NULL UNIQUE,
     expires_at  TIMESTAMP NOT NULL,
     created_at  TIMESTAMP NOT NULL,
-    updated_at  TIMESTAMP NOT NULL,
-    created_by  BIGINT NOT NULL,
-    updated_by  BIGINT NOT NULL
+    updated_at  TIMESTAMP NOT NULL
 );
 
 ALTER TABLE refresh_tokens
