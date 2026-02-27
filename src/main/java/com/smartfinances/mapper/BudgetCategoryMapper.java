@@ -1,8 +1,6 @@
 package com.smartfinances.mapper;
 
-import org.springframework.stereotype.Component;
-
-@Component
+// Placeholder - will be implemented when BudgetCategory feature is ready
 public class BudgetCategoryMapper {
 
 }

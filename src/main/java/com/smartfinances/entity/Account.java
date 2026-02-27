@@ -1,8 +1,6 @@
 package com.smartfinances.entity;
 
-import jakarta.persistence.Entity;
-
-@Entity
+// Placeholder - will be implemented in future migration
 public class Account {
 
 }

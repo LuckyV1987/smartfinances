@@ -1,8 +1,6 @@
 package com.smartfinances.controller;
 
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
+// Placeholder - will be implemented when Account feature is ready
 public class AccountController {
 
 }

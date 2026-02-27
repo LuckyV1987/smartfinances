@@ -6,11 +6,13 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
-public class AuditorAwareImpl implements AuditorAware<String> {
+public class AuditorAwareImpl implements AuditorAware<Long> {
 
     @Override
-    public Optional<String> getCurrentAuditor() {
-        return Optional.empty();
+    public Optional<Long> getCurrentAuditor() {
+        // TODO: Return current authenticated user ID from SecurityContext
+        // For now, return a default system user ID
+        return Optional.of(1L);
     }
 
 }
