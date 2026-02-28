@@ -1,6 +1,7 @@
 package com.smartfinances.service;
 
 import com.smartfinances.dto.request.UserRequestDTO;
+import com.smartfinances.dto.request.UserUpdateRequestDTO;
 import com.smartfinances.dto.response.UserResponseDTO;
 import com.smartfinances.entity.User;
 import com.smartfinances.exception.DuplicateResourceException;
@@ -13,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -164,5 +166,190 @@ class UserServiceTest {
         verify(userRepository).findByEmail(email);
     }
 
-}
+    @Test
+    void shouldUpdateUser_whenValidRequest() {
+        // arrange
+        Long userId = 1L;
+        UserUpdateRequestDTO updateDTO = UserUpdateRequestDTO.builder()
+                .firstName("Jane")
+                .lastName("Smith")
+                .phoneNumber("9876543210")
+                .build();
 
+        User user = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .firstName("John")
+                .lastName("Doe")
+                .build();
+
+        User updatedUser = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .firstName("Jane")
+                .lastName("Smith")
+                .phoneNumber("9876543210")
+                .build();
+
+        UserResponseDTO responseDTO = UserResponseDTO.builder()
+                .id(userId)
+                .email("test@example.com")
+                .firstName("Jane")
+                .lastName("Smith")
+                .phoneNumber("9876543210")
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(user)).thenReturn(updatedUser);
+        when(userMapper.toResponseDTO(updatedUser)).thenReturn(responseDTO);
+
+        // act
+        UserResponseDTO result = userService.update(userId, updateDTO);
+
+        // assert
+        assertThat(result).isNotNull();
+        assertThat(result.getFirstName()).isEqualTo("Jane");
+        assertThat(result.getLastName()).isEqualTo("Smith");
+        verify(userRepository).findById(userId);
+        verify(userMapper).updateEntityFromDTO(updateDTO, user);
+        verify(userRepository).save(user);
+        verify(userMapper).toResponseDTO(updatedUser);
+    }
+
+    @Test
+    void shouldThrowException_whenUserNotFoundOnUpdate() {
+        // arrange
+        Long userId = 999L;
+        UserUpdateRequestDTO updateDTO = UserUpdateRequestDTO.builder()
+                .firstName("Jane")
+                .lastName("Smith")
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        // act & assert
+        assertThatThrownBy(() -> userService.update(userId, updateDTO))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("User not found with id");
+
+        verify(userRepository).findById(userId);
+        verify(userMapper, never()).updateEntityFromDTO(any(), any());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldDeactivateUser_whenValidId() {
+        // arrange
+        Long userId = 1L;
+        User user = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .firstName("John")
+                .lastName("Doe")
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(user)).thenReturn(user);
+
+        // act
+        userService.deactivate(userId);
+
+        // assert
+        verify(userRepository).findById(userId);
+        verify(userRepository).save(user);
+        assertThat(user.getDeletedAt()).isNotNull();
+    }
+
+    @Test
+    void shouldThrowException_whenUserNotFoundOnDeactivate() {
+        // arrange
+        Long userId = 999L;
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        // act & assert
+        assertThatThrownBy(() -> userService.deactivate(userId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("User not found with id");
+
+        verify(userRepository).findById(userId);
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldOnlyUpdateProvidedFields_whenPartialRequest() {
+        // arrange
+        Long userId = 1L;
+        UserUpdateRequestDTO updateDTO = UserUpdateRequestDTO.builder()
+                .firstName("Jane")
+                .lastName("Smith")
+                .build();
+
+        User user = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .firstName("John")
+                .lastName("Doe")
+                .phoneNumber("1234567890")
+                .dateOfBirth(LocalDate.of(1990, 1, 1))
+                .build();
+
+        User updatedUser = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .firstName("Jane")
+                .lastName("Smith")
+                .phoneNumber("1234567890")
+                .dateOfBirth(LocalDate.of(1990, 1, 1))
+                .build();
+
+        UserResponseDTO responseDTO = UserResponseDTO.builder()
+                .id(userId)
+                .email("test@example.com")
+                .firstName("Jane")
+                .lastName("Smith")
+                .phoneNumber("1234567890")
+                .dateOfBirth(LocalDate.of(1990, 1, 1))
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(user)).thenReturn(updatedUser);
+        when(userMapper.toResponseDTO(updatedUser)).thenReturn(responseDTO);
+
+        // act
+        UserResponseDTO result = userService.update(userId, updateDTO);
+
+        // assert
+        assertThat(result).isNotNull();
+        assertThat(result.getFirstName()).isEqualTo("Jane");
+        assertThat(result.getLastName()).isEqualTo("Smith");
+        assertThat(result.getPhoneNumber()).isEqualTo("1234567890");
+        assertThat(result.getDateOfBirth()).isEqualTo(LocalDate.of(1990, 1, 1));
+        verify(userRepository).findById(userId);
+        verify(userMapper).updateEntityFromDTO(updateDTO, user);
+        verify(userRepository).save(user);
+        verify(userMapper).toResponseDTO(updatedUser);
+    }
+
+    @Test
+    void shouldNotReturnDeactivatedUser_whenDeleted() {
+        // arrange
+        Long userId = 1L;
+        User user = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .firstName("John")
+                .lastName("Doe")
+                .deletedAt(LocalDateTime.now())
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        // act & assert
+        assertThatThrownBy(() -> userService.findById(userId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("User not found with id");
+
+        verify(userRepository).findById(userId);
+    }
+
+}
