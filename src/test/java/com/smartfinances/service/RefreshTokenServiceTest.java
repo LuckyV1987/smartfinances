@@ -13,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -165,20 +164,26 @@ class RefreshTokenServiceTest {
     @Test
     void shouldRevokeAllTokens_forUser() {
         // arrange
-        User user1 = User.builder().id(1L).build();
-        User user2 = User.builder().id(2L).build();
-
-        RefreshToken token1 = RefreshToken.builder().id(1L).user(user1).build();
-        RefreshToken token2 = RefreshToken.builder().id(2L).user(user1).build();
-        RefreshToken token3 = RefreshToken.builder().id(3L).user(user2).build();
-
-        when(refreshTokenRepository.findAll()).thenReturn(List.of(token1, token2, token3));
+        // (no setup needed - deleteByUserId is a void method)
 
         // act
         refreshTokenService.revokeAllForUser(1L);
 
         // assert
-        verify(refreshTokenRepository).deleteAll(List.of(token1, token2));
+        verify(refreshTokenRepository).deleteByUserId(1L);
+        verifyNoMoreInteractions(refreshTokenRepository);
+    }
+
+    @Test
+    void shouldCallRepositoryOnce_whenRevokeAllForUser() {
+        // arrange
+        Long userId = 42L;
+
+        // act
+        refreshTokenService.revokeAllForUser(userId);
+
+        // assert
+        verify(refreshTokenRepository, times(1)).deleteByUserId(userId);
     }
 }
 

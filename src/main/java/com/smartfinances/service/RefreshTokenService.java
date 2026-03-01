@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -87,13 +86,7 @@ public class RefreshTokenService {
 
     @Transactional
     public void revokeAllForUser(Long userId) {
-        // Find all tokens for userId
-        List<RefreshToken> tokens = refreshTokenRepository.findAll().stream()
-                .filter(t -> t.getUser().getId().equals(userId))
-                .toList();
-
-        // Delete all
-        refreshTokenRepository.deleteAll(tokens);
+        refreshTokenRepository.deleteByUserId(userId);
     }
 }
 
