@@ -22,6 +22,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").permitAll()
                         .requestMatchers("/api/ownership-entities/**").permitAll()
                         .requestMatchers("/api/budget-allocations/**").authenticated()
+                        .requestMatchers("/api/financial-accounts/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable());
