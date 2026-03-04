@@ -17,10 +17,12 @@ import com.smartfinances.repository.BudgetAllocationCategoryRepository;
 import com.smartfinances.repository.BudgetAllocationRepository;
 import com.smartfinances.repository.OwnershipEntityRepository;
 import com.smartfinances.repository.SpendCategoryRepository;
+import com.smartfinances.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +33,7 @@ public class BudgetAllocationService {
     private final OwnershipEntityRepository ownershipEntityRepository;
     private final BudgetAllocationCategoryRepository budgetAllocationCategoryRepository;
     private final SpendCategoryRepository spendCategoryRepository;
+    private final TransactionRepository transactionRepository;
     private final BudgetAllocationMapper budgetAllocationMapper;
     private final SpendCategoryMapper spendCategoryMapper;
 
@@ -39,12 +42,14 @@ public class BudgetAllocationService {
             OwnershipEntityRepository ownershipEntityRepository,
             BudgetAllocationCategoryRepository budgetAllocationCategoryRepository,
             SpendCategoryRepository spendCategoryRepository,
+            TransactionRepository transactionRepository,
             BudgetAllocationMapper budgetAllocationMapper,
             SpendCategoryMapper spendCategoryMapper) {
         this.budgetAllocationRepository = budgetAllocationRepository;
         this.ownershipEntityRepository = ownershipEntityRepository;
         this.budgetAllocationCategoryRepository = budgetAllocationCategoryRepository;
         this.spendCategoryRepository = spendCategoryRepository;
+        this.transactionRepository = transactionRepository;
         this.budgetAllocationMapper = budgetAllocationMapper;
         this.spendCategoryMapper = spendCategoryMapper;
     }
@@ -159,14 +164,33 @@ public class BudgetAllocationService {
         return budgetAllocationMapper.toResponseDTO(allocation, categories, currentBalance);
     }
 
-    // Balance calculation stub - returns ZERO until transaction linking is implemented
+    // Balance calculation - sums transactions by allocation within current interval
     private BigDecimal calculateBalance(BudgetAllocation allocation) {
-        // TODO: Future implementation will sum transactions by allocation_id within current interval
         // interval is null (one-time): sum ALL linked transactions ever
+        if (allocation.getInterval() == null) {
+            return transactionRepository.sumAmountByAllocationId(allocation.getId());
+        }
+
         // interval is set: sum transactions within current period
-        //   e.g. MONTHLY = 1st of current month to today
-        // Carryover transactions included as regular transactions
-        return BigDecimal.ZERO;
+        // Calculate current period based on interval
+        LocalDate startDate = calculateIntervalStartDate(allocation.getInterval());
+        LocalDate endDate = LocalDate.now();
+
+        return transactionRepository.sumAmountByAllocationIdAndDateRange(
+                allocation.getId(), startDate, endDate);
+    }
+
+    // Helper to calculate the start date of the current interval period
+    private LocalDate calculateIntervalStartDate(com.smartfinances.entity.enums.AllocationIntervalEnum interval) {
+        LocalDate now = LocalDate.now();
+
+        return switch (interval) {
+            case WEEKLY -> now.minusWeeks(1).plusDays(1); // Start of current week
+            case FORTNIGHTLY -> now.minusWeeks(2).plusDays(1);
+            case MONTHLY -> now.withDayOfMonth(1); // 1st of current month
+            case QUARTERLY -> now.withDayOfMonth(1).minusMonths(now.getMonthValue() % 3);
+            case YEARLY -> now.withDayOfYear(1); // Jan 1st of current year
+        };
     }
 
     // Validation rules

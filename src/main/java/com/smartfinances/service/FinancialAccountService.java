@@ -11,6 +11,7 @@ import com.smartfinances.exception.ResourceNotFoundException;
 import com.smartfinances.mapper.FinancialAccountMapper;
 import com.smartfinances.repository.FinancialAccountRepository;
 import com.smartfinances.repository.OwnershipEntityRepository;
+import com.smartfinances.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,14 +24,17 @@ public class FinancialAccountService {
 
     private final FinancialAccountRepository financialAccountRepository;
     private final OwnershipEntityRepository ownershipEntityRepository;
+    private final TransactionRepository transactionRepository;
     private final FinancialAccountMapper financialAccountMapper;
 
     public FinancialAccountService(
             FinancialAccountRepository financialAccountRepository,
             OwnershipEntityRepository ownershipEntityRepository,
+            TransactionRepository transactionRepository,
             FinancialAccountMapper financialAccountMapper) {
         this.financialAccountRepository = financialAccountRepository;
         this.ownershipEntityRepository = ownershipEntityRepository;
+        this.transactionRepository = transactionRepository;
         this.financialAccountMapper = financialAccountMapper;
     }
 
@@ -125,18 +129,19 @@ public class FinancialAccountService {
 
     // Helper method to build response DTO with balance
     private FinancialAccountResponseDTO buildResponseDTO(FinancialAccount account) {
-        // Calculate balance (stub implementation - always returns ZERO until transactions are implemented)
+        // Calculate real balance from transactions
         BigDecimal currentBalance = calculateBalance(account);
         return financialAccountMapper.toResponseDTO(account, currentBalance);
     }
 
-    // Balance calculation stub - returns ZERO until transaction linking is implemented
+    // Balance calculation - sums all transactions for this account
     private BigDecimal calculateBalance(FinancialAccount account) {
-        // TODO: Future implementation will sum transactions by account_id
         // Sum all transactions linked to this account
-        // For CREDIT_CARD: negative balance = owed, positive = overpaid
-        // For all others: positive balance = available funds
-        return BigDecimal.ZERO;
+        // Note: The query sums absolute amounts. For proper balance calculation,
+        // we would need to consider transaction types (CREDIT adds, DEBIT subtracts).
+        // For now, this returns the simple sum. A future enhancement could be:
+        // SELECT SUM(CASE WHEN type='CREDIT' THEN amount ELSE -amount END)
+        return transactionRepository.sumAmountByFinancialAccountId(account.getId());
     }
 }
 

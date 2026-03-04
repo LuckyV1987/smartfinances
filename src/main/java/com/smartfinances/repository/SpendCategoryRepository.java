@@ -13,6 +13,8 @@ public interface SpendCategoryRepository extends JpaRepository<SpendCategory, Lo
 
     List<SpendCategory> findByActiveTrue();
 
+    Optional<SpendCategory> findByIdAndActiveTrue(Long id);
+
     List<SpendCategory> findByTypeAndActiveTrue(SpendCategoryType type);
 
     Optional<SpendCategory> findByNameIgnoreCase(String name);
