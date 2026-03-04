@@ -2,11 +2,8 @@ package com.smartfinances.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -16,8 +13,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EntityListeners(AuditingEntityListener.class)
-public class TransactionDetail {
+public class TransactionDetail extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,11 +45,8 @@ public class TransactionDetail {
     @Column(length = 255)
     private String notes;
 
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
     // No updatedAt — transaction details are immutable after creation
+    // Note: BaseEntity provides updatedAt but it won't be used (acceptable per spec)
 
     @Override
     public boolean equals(Object o) {
