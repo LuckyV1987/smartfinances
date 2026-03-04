@@ -11,6 +11,7 @@ import com.smartfinances.exception.ResourceNotFoundException;
 import com.smartfinances.mapper.FinancialAccountMapper;
 import com.smartfinances.repository.FinancialAccountRepository;
 import com.smartfinances.repository.OwnershipEntityRepository;
+import com.smartfinances.repository.TransactionRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,6 +37,9 @@ class FinancialAccountServiceTest {
 
     @Mock
     private OwnershipEntityRepository ownershipEntityRepository;
+
+    @Mock
+    private TransactionRepository transactionRepository;
 
     @Mock
     private FinancialAccountMapper financialAccountMapper;
@@ -79,6 +83,7 @@ class FinancialAccountServiceTest {
         when(ownershipEntityRepository.findByIdAndActiveTrue(entityId)).thenReturn(Optional.of(entity));
         when(financialAccountRepository.findByOwnershipEntityIdAndActiveTrue(entityId))
                 .thenReturn(Arrays.asList(account1, account2));
+        when(transactionRepository.sumAmountByFinancialAccountId(any())).thenReturn(BigDecimal.ZERO);
         when(financialAccountMapper.toResponseDTO(eq(account1), any())).thenReturn(dto1);
         when(financialAccountMapper.toResponseDTO(eq(account2), any())).thenReturn(dto2);
 
@@ -119,6 +124,7 @@ class FinancialAccountServiceTest {
         when(ownershipEntityRepository.findByIdAndActiveTrue(entityId)).thenReturn(Optional.of(entity));
         when(financialAccountRepository.findByOwnershipEntityIdAndTypeAndActiveTrue(entityId, type))
                 .thenReturn(List.of(account));
+        when(transactionRepository.sumAmountByFinancialAccountId(any())).thenReturn(BigDecimal.ZERO);
         when(financialAccountMapper.toResponseDTO(eq(account), any())).thenReturn(dto);
 
         // act
@@ -146,6 +152,7 @@ class FinancialAccountServiceTest {
                 .build();
 
         when(financialAccountRepository.findByIdAndActiveTrue(accountId)).thenReturn(Optional.of(account));
+        when(transactionRepository.sumAmountByFinancialAccountId(accountId)).thenReturn(BigDecimal.ZERO);
         when(financialAccountMapper.toResponseDTO(eq(account), any())).thenReturn(dto);
 
         // act
@@ -198,6 +205,7 @@ class FinancialAccountServiceTest {
                 .build();
 
         when(financialAccountRepository.findByIdAndActiveTrue(accountId)).thenReturn(Optional.of(account));
+        when(transactionRepository.sumAmountByFinancialAccountId(accountId)).thenReturn(BigDecimal.ZERO);
         when(financialAccountMapper.toResponseDTO(eq(account), eq(BigDecimal.ZERO))).thenReturn(dto);
 
         // act
@@ -363,6 +371,7 @@ class FinancialAccountServiceTest {
                 .thenReturn(false);
         doNothing().when(financialAccountMapper).updateEntityFromDTO(request, account);
         when(financialAccountRepository.save(account)).thenReturn(updatedAccount);
+        when(transactionRepository.sumAmountByFinancialAccountId(accountId)).thenReturn(BigDecimal.ZERO);
         when(financialAccountMapper.toResponseDTO(eq(updatedAccount), any())).thenReturn(response);
 
         // act
@@ -411,6 +420,7 @@ class FinancialAccountServiceTest {
                 .thenReturn(false);
         doNothing().when(financialAccountMapper).updateEntityFromDTO(request, account);
         when(financialAccountRepository.save(account)).thenReturn(savedAccount);
+        when(transactionRepository.sumAmountByFinancialAccountId(accountId)).thenReturn(BigDecimal.ZERO);
         when(financialAccountMapper.toResponseDTO(eq(savedAccount), any())).thenReturn(response);
 
         // act
@@ -457,6 +467,7 @@ class FinancialAccountServiceTest {
                 .thenReturn(false);
         doNothing().when(financialAccountMapper).updateEntityFromDTO(request, account);
         when(financialAccountRepository.save(account)).thenReturn(savedAccount);
+        when(transactionRepository.sumAmountByFinancialAccountId(accountId)).thenReturn(BigDecimal.ZERO);
         when(financialAccountMapper.toResponseDTO(eq(savedAccount), any())).thenReturn(response);
 
         // act

@@ -17,6 +17,7 @@ import com.smartfinances.repository.BudgetAllocationCategoryRepository;
 import com.smartfinances.repository.BudgetAllocationRepository;
 import com.smartfinances.repository.OwnershipEntityRepository;
 import com.smartfinances.repository.SpendCategoryRepository;
+import com.smartfinances.repository.TransactionRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,6 +49,9 @@ class BudgetAllocationServiceTest {
 
     @Mock
     private SpendCategoryRepository spendCategoryRepository;
+
+    @Mock
+    private TransactionRepository transactionRepository;
 
     @Mock
     private BudgetAllocationMapper budgetAllocationMapper;
@@ -96,6 +100,7 @@ class BudgetAllocationServiceTest {
                 .thenReturn(Arrays.asList(allocation1, allocation2));
         when(budgetAllocationCategoryRepository.findByBudgetAllocationId(1L)).thenReturn(List.of());
         when(budgetAllocationCategoryRepository.findByBudgetAllocationId(2L)).thenReturn(List.of());
+        when(transactionRepository.sumAmountByAllocationId(any())).thenReturn(BigDecimal.ZERO);
         when(budgetAllocationMapper.toResponseDTO(eq(allocation1), any(), any())).thenReturn(dto1);
         when(budgetAllocationMapper.toResponseDTO(eq(allocation2), any(), any())).thenReturn(dto2);
 
@@ -137,6 +142,7 @@ class BudgetAllocationServiceTest {
         when(budgetAllocationRepository.findByOwnershipEntityIdAndTypeAndActiveTrue(entityId, type))
                 .thenReturn(List.of(allocation));
         when(budgetAllocationCategoryRepository.findByBudgetAllocationId(1L)).thenReturn(List.of());
+        when(transactionRepository.sumAmountByAllocationId(1L)).thenReturn(BigDecimal.ZERO);
         when(budgetAllocationMapper.toResponseDTO(eq(allocation), any(), any())).thenReturn(dto);
 
         // act
@@ -165,6 +171,7 @@ class BudgetAllocationServiceTest {
 
         when(budgetAllocationRepository.findByIdAndActiveTrue(allocationId)).thenReturn(Optional.of(allocation));
         when(budgetAllocationCategoryRepository.findByBudgetAllocationId(allocationId)).thenReturn(List.of());
+        when(transactionRepository.sumAmountByAllocationId(allocationId)).thenReturn(BigDecimal.ZERO);
         when(budgetAllocationMapper.toResponseDTO(eq(allocation), any(), any())).thenReturn(dto);
 
         // act
@@ -218,6 +225,7 @@ class BudgetAllocationServiceTest {
 
         when(budgetAllocationRepository.findByIdAndActiveTrue(allocationId)).thenReturn(Optional.of(allocation));
         when(budgetAllocationCategoryRepository.findByBudgetAllocationId(allocationId)).thenReturn(List.of());
+        when(transactionRepository.sumAmountByAllocationId(allocationId)).thenReturn(BigDecimal.ZERO);
         when(budgetAllocationMapper.toResponseDTO(eq(allocation), any(), eq(BigDecimal.ZERO))).thenReturn(dto);
 
         // act
@@ -483,6 +491,7 @@ class BudgetAllocationServiceTest {
         doNothing().when(budgetAllocationMapper).updateEntityFromDTO(request, allocation);
         when(budgetAllocationRepository.save(allocation)).thenReturn(updatedAllocation);
         when(budgetAllocationCategoryRepository.findByBudgetAllocationId(allocationId)).thenReturn(List.of());
+        when(transactionRepository.sumAmountByAllocationId(allocationId)).thenReturn(BigDecimal.ZERO);
         when(budgetAllocationMapper.toResponseDTO(eq(updatedAllocation), any(), any())).thenReturn(response);
 
         // act
@@ -534,6 +543,7 @@ class BudgetAllocationServiceTest {
         doNothing().when(budgetAllocationMapper).updateEntityFromDTO(request, allocation);
         when(budgetAllocationRepository.save(allocation)).thenReturn(savedAllocation);
         when(budgetAllocationCategoryRepository.findByBudgetAllocationId(allocationId)).thenReturn(List.of());
+        when(transactionRepository.sumAmountByAllocationId(allocationId)).thenReturn(BigDecimal.ZERO);
         when(budgetAllocationMapper.toResponseDTO(eq(savedAllocation), any(), any())).thenReturn(response);
 
         // act
