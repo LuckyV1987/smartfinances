@@ -2,10 +2,7 @@ package com.smartfinances.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -23,8 +20,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EntityListeners(AuditingEntityListener.class)
-public class BudgetAllocationCategory {
+public class BudgetAllocationCategory extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,9 +37,6 @@ public class BudgetAllocationCategory {
     @JoinColumn(name = "spend_category_id", nullable = false)
     private SpendCategory spendCategory;
 
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
 
     @Override
     public boolean equals(Object o) {

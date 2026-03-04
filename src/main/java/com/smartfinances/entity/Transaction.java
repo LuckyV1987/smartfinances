@@ -3,12 +3,9 @@ package com.smartfinances.entity;
 import com.smartfinances.entity.enums.TransactionTypeEnum;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -18,8 +15,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EntityListeners(AuditingEntityListener.class)
-public class Transaction {
+public class Transaction extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -65,11 +61,8 @@ public class Transaction {
     @Builder.Default
     private boolean systemGenerated = false;
 
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
     // No updatedAt — transactions are immutable after creation
+    // Note: BaseEntity provides updatedAt but it won't be used (acceptable per spec)
 
     @Override
     public boolean equals(Object o) {
