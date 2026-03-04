@@ -3,10 +3,15 @@ package com.smartfinances.service;
 import com.smartfinances.dto.request.UserRequestDTO;
 import com.smartfinances.dto.request.UserUpdateRequestDTO;
 import com.smartfinances.dto.response.UserResponseDTO;
+import com.smartfinances.entity.OwnershipEntity;
+import com.smartfinances.entity.OwnershipMembership;
 import com.smartfinances.entity.User;
+import com.smartfinances.entity.enums.OwnershipEntityType;
 import com.smartfinances.exception.DuplicateResourceException;
 import com.smartfinances.exception.ResourceNotFoundException;
 import com.smartfinances.mapper.UserMapper;
+import com.smartfinances.repository.OwnershipEntityRepository;
+import com.smartfinances.repository.OwnershipMembershipRepository;
 import com.smartfinances.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,10 +23,18 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final OwnershipEntityRepository ownershipEntityRepository;
+    private final OwnershipMembershipRepository ownershipMembershipRepository;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
+    public UserService(
+            UserRepository userRepository,
+            UserMapper userMapper,
+            OwnershipEntityRepository ownershipEntityRepository,
+            OwnershipMembershipRepository ownershipMembershipRepository) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.ownershipEntityRepository = ownershipEntityRepository;
+        this.ownershipMembershipRepository = ownershipMembershipRepository;
     }
 
     @Transactional
@@ -36,6 +49,23 @@ public class UserService {
 
         // Save entity
         User savedUser = userRepository.save(user);
+
+        // Create personal ownership entity
+        String personalEntityName = savedUser.getFirstName() + "'s Personal Space";
+        OwnershipEntity personalEntity = OwnershipEntity.builder()
+                .name(personalEntityName)
+                .type(OwnershipEntityType.PERSONAL)
+                .active(true)
+                .build();
+        OwnershipEntity savedEntity = ownershipEntityRepository.save(personalEntity);
+
+        // Create membership
+        OwnershipMembership membership = OwnershipMembership.builder()
+                .user(savedUser)
+                .ownershipEntity(savedEntity)
+                .active(true)
+                .build();
+        ownershipMembershipRepository.save(membership);
 
         // Return response DTO
         return userMapper.toResponseDTO(savedUser);

@@ -3,10 +3,15 @@ package com.smartfinances.service;
 import com.smartfinances.dto.request.UserRequestDTO;
 import com.smartfinances.dto.request.UserUpdateRequestDTO;
 import com.smartfinances.dto.response.UserResponseDTO;
+import com.smartfinances.entity.OwnershipEntity;
+import com.smartfinances.entity.OwnershipMembership;
 import com.smartfinances.entity.User;
+import com.smartfinances.entity.enums.OwnershipEntityType;
 import com.smartfinances.exception.DuplicateResourceException;
 import com.smartfinances.exception.ResourceNotFoundException;
 import com.smartfinances.mapper.UserMapper;
+import com.smartfinances.repository.OwnershipEntityRepository;
+import com.smartfinances.repository.OwnershipMembershipRepository;
 import com.smartfinances.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +36,12 @@ class UserServiceTest {
 
     @Mock
     private UserMapper userMapper;
+
+    @Mock
+    private OwnershipEntityRepository ownershipEntityRepository;
+
+    @Mock
+    private OwnershipMembershipRepository ownershipMembershipRepository;
 
     @InjectMocks
     private UserService userService;
@@ -61,9 +72,25 @@ class UserServiceTest {
                 .createdAt(LocalDateTime.now())
                 .build();
 
+        OwnershipEntity personalEntity = OwnershipEntity.builder()
+                .id(1L)
+                .name("John's Personal Space")
+                .type(OwnershipEntityType.PERSONAL)
+                .active(true)
+                .build();
+
+        OwnershipMembership membership = OwnershipMembership.builder()
+                .id(1L)
+                .user(user)
+                .ownershipEntity(personalEntity)
+                .active(true)
+                .build();
+
         when(userRepository.findByEmail(requestDTO.getEmail())).thenReturn(Optional.empty());
         when(userMapper.toEntity(requestDTO)).thenReturn(user);
         when(userRepository.save(any(User.class))).thenReturn(user);
+        when(ownershipEntityRepository.save(any(OwnershipEntity.class))).thenReturn(personalEntity);
+        when(ownershipMembershipRepository.save(any(OwnershipMembership.class))).thenReturn(membership);
         when(userMapper.toResponseDTO(user)).thenReturn(responseDTO);
 
         // act
@@ -76,6 +103,8 @@ class UserServiceTest {
         verify(userRepository).findByEmail(requestDTO.getEmail());
         verify(userMapper).toEntity(requestDTO);
         verify(userRepository).save(any(User.class));
+        verify(ownershipEntityRepository).save(any(OwnershipEntity.class));
+        verify(ownershipMembershipRepository).save(any(OwnershipMembership.class));
         verify(userMapper).toResponseDTO(user);
     }
 

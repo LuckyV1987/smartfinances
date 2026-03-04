@@ -9,6 +9,8 @@ import com.smartfinances.dto.request.RefreshRequestDTO;
 import com.smartfinances.dto.request.UserRequestDTO;
 import com.smartfinances.entity.RefreshToken;
 import com.smartfinances.entity.User;
+import com.smartfinances.repository.OwnershipEntityRepository;
+import com.smartfinances.repository.OwnershipMembershipRepository;
 import com.smartfinances.repository.RefreshTokenRepository;
 import com.smartfinances.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,12 +52,20 @@ class AuthControllerIntegrationTest {
     private RefreshTokenRepository refreshTokenRepository;
 
     @Autowired
+    private OwnershipEntityRepository ownershipEntityRepository;
+
+    @Autowired
+    private OwnershipMembershipRepository ownershipMembershipRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         refreshTokenRepository.deleteAll();
+        ownershipMembershipRepository.deleteAll();
+        ownershipEntityRepository.deleteAll();
         userRepository.deleteAll();
     }
 

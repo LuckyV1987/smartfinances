@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.smartfinances.dto.request.UserUpdateRequestDTO;
 import com.smartfinances.entity.User;
+import com.smartfinances.repository.OwnershipEntityRepository;
+import com.smartfinances.repository.OwnershipMembershipRepository;
 import com.smartfinances.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,11 +44,19 @@ class UserControllerIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private OwnershipEntityRepository ownershipEntityRepository;
+
+    @Autowired
+    private OwnershipMembershipRepository ownershipMembershipRepository;
+
+    @Autowired
     private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        ownershipMembershipRepository.deleteAll();
+        ownershipEntityRepository.deleteAll();
         userRepository.deleteAll();
     }
 
